@@ -1,0 +1,47 @@
+---
+version: '3.4'
+services:
+
+  orion:
+    image: pegasyseng/orion:${ORION_VERSION}
+    volumes:
+      - ./config/orion:/opt/orion/conf/
+      - ./data/orion:/opt/orion/data/
+    command: /opt/orion/bin/orion /opt/orion/conf/orion.conf
+    ports:
+      - 8888:8888
+      - 8080:8080
+
+  besu:
+    image: hyperledger/besu:${BESU_VERSION}
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/opt/besu/conf/log-config.xml
+    volumes:
+      - ./config/besu:/opt/besu/conf/
+      - ./data/besu:/opt/besu/data/
+    command: [
+      "--config-file=/opt/besu/conf/besu.conf",
+      "--privacy-enabled=${PRIVACY_ENABLED}",
+      "--permissions-accounts-contract-enabled=${PERMISSIONING_ENABLED}",
+      "--permissions-nodes-contract-enabled=${PERMISSIONING_ENABLED}"]
+    ports:
+      - 8545:8545
+      - 8546:8546
+      - 8547:8547
+
+  ethsigner:
+    image: pegasyseng/ethsigner:${ETHSIGNER_VERSION}
+    volumes:
+      - ./config/ethsigner:/opt/ethsigner/conf/
+    command: [
+      "--chain-id=2018",
+      "--downstream-http-host=besu",
+      "--downstream-http-port=8545",
+      "--http-listen-host=0.0.0.0",
+      "--http-listen-port=8545",
+      "file-based-signer",
+      "--key-file=/opt/ethsigner/conf/keyFile",
+      "--password-file=/opt/ethsigner/conf/passwordFile"
+    ]
+    ports:
+      - 9545:8545
