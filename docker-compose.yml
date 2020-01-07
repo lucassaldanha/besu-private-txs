@@ -14,6 +14,8 @@ services:
 
   besu:
     image: hyperledger/besu:${BESU_VERSION}
+    depends_on:
+      - orion
     environment:
       - LOG4J_CONFIGURATION_FILE=/opt/besu/conf/log-config.xml
     volumes:
@@ -31,6 +33,8 @@ services:
 
   ethsigner:
     image: pegasyseng/ethsigner:${ETHSIGNER_VERSION}
+    depends_on:
+      - besu
     volumes:
       - ./config/ethsigner:/opt/ethsigner/conf/
     command: [
